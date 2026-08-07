@@ -35,6 +35,9 @@ KO_FEEDS = {  # later rounds: home = winner of feeds[0], away = winner of feeds[
     "qf4": ("r16g", "r16h"), "sf1": ("qf1", "qf3"), "sf2": ("qf2", "qf4"),
     "final": ("sf1", "sf2"),
 }
+KO_LOSER_FEEDS = {  # third-place play-off: the two beaten semi-finalists
+    "third": ("sf1", "sf2"),
+}
 
 # ESPN display / text names -> app team codes.
 NAME2CODE = {
@@ -55,7 +58,7 @@ NAME2CODE = {
 # Goalkeeper per team (for clean-sheet attribution) + editorial note.
 KEEPERS = {"ESP": "Unai Simón", "MEX": "Raúl Rangel"}
 CS_NOTES = {
-    "ESP": "Spain are yet to concede at this World Cup",
+    "ESP": "World champions — one goal conceded in eight matches",
     "MEX": "Eliminated by England in the round of 16",
 }
 
@@ -134,15 +137,19 @@ def gather():
 
 def resolve_results(by_pair):
     """Walk the bracket, matching completed ESPN games to slots by team pair."""
-    winners, results = {}, {}
+    winners, losers, results = {}, {}, {}
 
     def resolve_slot(sid):
         if sid in KO_FIXED:
             return KO_FIXED[sid]
+        if sid in KO_LOSER_FEEDS:
+            f0, f1 = KO_LOSER_FEEDS[sid]
+            return (losers.get(f0), losers.get(f1))
         f0, f1 = KO_FEEDS[sid]
         return (winners.get(f0), winners.get(f1))
 
-    order = list(KO_FIXED) + list(KO_FEEDS)  # fixed first, then feeds in defined (dependency) order
+    # fixed first, then feeds in dependency order, then the loser-fed play-off
+    order = list(KO_FIXED) + list(KO_FEEDS) + list(KO_LOSER_FEEDS)
     for _ in range(4):  # a few passes so later rounds resolve as earlier ones fill in
         for sid in order:
             if sid in results:
@@ -162,6 +169,7 @@ def resolve_results(by_pair):
             if game["winner"]:
                 entry["winner"] = game["winner"]
                 winners[sid] = game["winner"]
+                losers[sid] = away if game["winner"] == home else home
             if game["aet"]:
                 entry["aet"] = True
             results[sid] = entry

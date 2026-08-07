@@ -9,12 +9,13 @@ import {
 } from "recharts";
 
 /* ============================================================================
-   DATA — compiled from live sources on July 2, 2026 (NBC, CBS, FOX, FIFA.com).
-   Tournament state: group stage complete, Round of 32 in progress.
-   Uncertain figures are flagged with `unverified: true` and shown with a ※.
+   DATA — the tournament is complete: Spain beat Argentina 1–0 (aet) in the
+   final at MetLife Stadium on July 19, 2026. Everything below is the static
+   fallback snapshot; live results and stat tables stream from live.json /
+   ESPN at runtime (see useLiveData).
 ============================================================================ */
 
-const DATA_AS_OF = "July 2, 2026";
+const DATA_AS_OF = "July 19, 2026";
 
 const TEAMS = {
   MEX: { name: "Mexico", flag: "🇲🇽", stars: ["Raúl Rangel (GK)", "Edson Álvarez", "Santiago Giménez"] },
@@ -160,7 +161,7 @@ const R32 = [
   { id: "m85", home: "SUI", away: "ALG", kickoff: "2026-07-03T03:00:00Z", venue: "BC Place, Vancouver" },
   { id: "m86", home: "AUS", away: "EGY", kickoff: "2026-07-03T18:00:00Z", venue: "AT&T Stadium, Dallas" },
   { id: "m87", home: "ARG", away: "CPV", kickoff: "2026-07-03T22:00:00Z", venue: "Hard Rock Stadium, Miami" },
-  { id: "m88", home: "COL", away: "GHA", kickoff: "2026-07-04T02:00:00Z", venue: null, timeTBC: true },
+  { id: "m88", home: "COL", away: "GHA", kickoff: "2026-07-04T02:00:00Z", venue: null },
 ];
 
 // feeds: [matchId, matchId] — winners of those matches meet here.
@@ -176,10 +177,10 @@ const R16 = [
 ];
 
 const QF = [
-  { id: "qf1", feeds: ["r16a", "r16b"], kickoff: "2026-07-09T20:00:00Z", venue: "Gillette Stadium, Boston", tbc: true },
-  { id: "qf2", feeds: ["r16c", "r16d"], kickoff: "2026-07-10T20:00:00Z", venue: "SoFi Stadium, Los Angeles", tbc: true },
-  { id: "qf3", feeds: ["r16e", "r16f"], kickoff: "2026-07-11T16:00:00Z", venue: "Arrowhead Stadium, Kansas City", tbc: true },
-  { id: "qf4", feeds: ["r16g", "r16h"], kickoff: "2026-07-11T20:00:00Z", venue: "Hard Rock Stadium, Miami", tbc: true },
+  { id: "qf1", feeds: ["r16a", "r16b"], kickoff: "2026-07-09T20:00:00Z", venue: "Gillette Stadium, Boston" },
+  { id: "qf2", feeds: ["r16c", "r16d"], kickoff: "2026-07-10T20:00:00Z", venue: "SoFi Stadium, Los Angeles" },
+  { id: "qf3", feeds: ["r16e", "r16f"], kickoff: "2026-07-11T16:00:00Z", venue: "Arrowhead Stadium, Kansas City" },
+  { id: "qf4", feeds: ["r16g", "r16h"], kickoff: "2026-07-11T20:00:00Z", venue: "Hard Rock Stadium, Miami" },
 ];
 
 const SF = [
@@ -191,52 +192,54 @@ const FINAL = [
   { id: "final", feeds: ["sf1", "sf2"], kickoff: "2026-07-19T19:00:00Z", venue: "MetLife Stadium, New York/NJ" },
 ];
 
-const ALL_KO = [...R32, ...R16, ...QF, ...SF, ...FINAL];
+// feedsLosers: contested by the two beaten semi-finalists.
+const THIRD = [
+  { id: "third", feedsLosers: ["sf1", "sf2"], kickoff: "2026-07-18T21:00:00Z", venue: "Hard Rock Stadium, Miami" },
+];
+
+const ALL_KO = [...R32, ...R16, ...QF, ...SF, ...THIRD, ...FINAL];
 const ROUNDS = [
   { key: "R32", label: "Round of 32", matches: R32 },
   { key: "R16", label: "Round of 16", matches: R16 },
   { key: "QF", label: "Quarter-finals", matches: QF },
   { key: "SF", label: "Semi-finals", matches: SF },
+  { key: "3RD", label: "Third place", matches: THIRD },
   { key: "F", label: "Final", matches: FINAL },
 ];
 
 const SCORERS = [
-  { player: "Kylian Mbappé", team: "FRA", goals: 6 },
-  { player: "Lionel Messi", team: "ARG", goals: 6 },
-  { player: "Erling Haaland", team: "NOR", goals: 5 },
-  { player: "Ousmane Dembélé", team: "FRA", goals: 4 },
-  { player: "Vinícius Júnior", team: "BRA", goals: 4 },
-  { player: "Harry Kane", team: "ENG", goals: 3, unverified: true },
-  { player: "Jonathan David", team: "CAN", goals: 3 },
-  { player: "Deniz Undav", team: "GER", goals: 3 },
-  { player: "Kai Havertz", team: "GER", goals: 3 },
-  { player: "Matheus Cunha", team: "BRA", goals: 3 },
-  { player: "Ismaïla Sarr", team: "SEN", goals: 3 },
-  { player: "Johan Manzambi", team: "SUI", goals: 3 },
-  { player: "Cody Gakpo", team: "NED", goals: 3 },
-  { player: "Brian Brobbey", team: "NED", goals: 3 },
-  { player: "Ismael Saibari", team: "MAR", goals: 3 },
-  { player: "Yoane Wissa", team: "COD", goals: 3 },
+  { player: "Kylian Mbappé", team: "FRA", goals: 10 },
+  { player: "Lionel Messi", team: "ARG", goals: 8 },
+  { player: "Jude Bellingham", team: "ENG", goals: 7 },
+  { player: "Erling Haaland", team: "NOR", goals: 7 },
+  { player: "Ousmane Dembélé", team: "FRA", goals: 6 },
+  { player: "Harry Kane", team: "ENG", goals: 6 },
+  { player: "Mikel Oyarzabal", team: "ESP", goals: 5 },
 ];
 
 const ASSISTS = [
-  { player: "Michael Olise", team: "FRA", assists: 5 },
-  { player: "Bruno Guimarães", team: "BRA", assists: 4, unverified: true },
+  { player: "Michael Olise", team: "FRA", assists: 7 },
+  { player: "Brahim Díaz", team: "MAR", assists: 4 },
+  { player: "Bruno Guimarães", team: "BRA", assists: 4 },
+  { player: "Kylian Mbappé", team: "FRA", assists: 4 },
+  { player: "Lionel Messi", team: "ARG", assists: 4 },
 ];
 
 const CLEAN_SHEETS = [
-  { player: "Raúl Rangel", team: "MEX", cs: 4, note: "3 in groups + shutout of Ecuador in the R32" },
-  { player: "Unai Simón", team: "ESP", cs: 3, note: "Spain are yet to concede at this World Cup" },
+  { player: "Unai Simón", team: "ESP", cs: 7, note: "World champions — one goal conceded in eight matches" },
+  { player: "Raúl Rangel", team: "MEX", cs: 4, note: "Eliminated by England in the round of 16" },
 ];
 
-// Editorial notes for match previews — only claims backed by reporting.
+// Editorial notes shown on match reports — only claims backed by the results.
 const MATCH_NOTES = {
-  m84: "Rematch of the Euro 2016 final — Ronaldo and Modrić, remarkably, still lead their sides.",
-  m83: "Spain arrive having not conceded a single goal in the tournament.",
-  m87: "Messi, level with Mbappé on 6 goals, chases the Golden Boot against debutants Cape Verde.",
-  r16c: "Haaland (5 goals) against the tournament's most in-form attack.",
-  r16d: "A knockout classic at the Azteca: co-hosts Mexico, unbeaten and yet to concede in open play, meet England.",
-  r16f: "USA vs Belgium — a rematch of the 2014 round-of-16 epic.",
+  final: "Spain beat Argentina 1–0 after extra time at MetLife Stadium to win their second World Cup.",
+  third: "England thrashed France 6–4 in the highest-scoring third-place play-off the tournament has seen.",
+  sf1: "Spain ended France's run 2–0 without conceding — again.",
+  sf2: "Messi's Argentina edged England 2–1 to reach a second straight final.",
+  r16e: "Mikel Merino's goal sent Spain past Ronaldo's Portugal 1–0.",
+  r16f: "Belgium routed the USA 4–1, Charles De Ketelaere scoring twice.",
+  r16g: "Messi struck once and set up another as Argentina came from 2–0 down to beat Egypt 3–2.",
+  m87: "Messi scored as Argentina survived an extra-time scare against debutants Cape Verde.",
 };
 
 const STATUS_META = {
@@ -253,10 +256,10 @@ const STATUS_META = {
 
 const LIVE_DEFAULTS = {
   asOf: DATA_AS_OF,
-  stage: "Round of 32 · knockout stage in progress",
+  stage: "Tournament complete · 🇪🇸 Spain are world champions",
   results: {},
   scorers: SCORERS,
-  scorersNote: "Ties are ordered by assists per FIFA's Golden Boot rules.",
+  scorersNote: "Mbappé won the Golden Boot outright on 10. Ties are ordered by assists.",
   assists: ASSISTS,
   cleanSheets: CLEAN_SHEETS,
   notes: MATCH_NOTES,
@@ -370,8 +373,13 @@ function useLiveData() {
           if (events.length) {
             next.results = applyEspnResults(events, next.results);
             src = "espn";
-            const stageName = espnRes.value?.leagues?.[0]?.season?.type?.name;
-            if (stageName) next.stage = `${stageName} · knockout stage in progress`;
+            // Once the final is decided the stage line is the champion, not a round.
+            const champ = next.results.final?.winner;
+            if (champ) next.stage = `Tournament complete · ${TEAMS[champ]?.flag ?? ""} ${nameOf(champ)} are world champions`;
+            else {
+              const stageName = espnRes.value?.leagues?.[0]?.season?.type?.name;
+              if (stageName) next.stage = `${stageName} · knockout stage in progress`;
+            }
           }
         } catch { /* fall back to local results */ }
       }
@@ -428,14 +436,22 @@ function resolveBracket(byId, predictions) {
       return { code: predictions[id], real: false };
     return null;
   };
+  const loserOf = (id) => {
+    const r = resolve(id);
+    const w = winnerOf(id);
+    if (!w || !r.home || !r.away) return null;
+    return { code: w.code === r.home ? r.away : r.home, real: w.real };
+  };
   const resolve = (id) => {
     if (resolved[id]) return resolved[id];
     const m = byId[id];
     let home = m.home ?? null, away = m.away ?? null;
     let homePredicted = false, awayPredicted = false;
-    if (m.feeds) {
-      const w0 = winnerOf(m.feeds[0]);
-      const w1 = winnerOf(m.feeds[1]);
+    const feed = m.feeds ?? m.feedsLosers;
+    if (feed) {
+      const pick = m.feedsLosers ? loserOf : winnerOf;
+      const w0 = pick(feed[0]);
+      const w1 = pick(feed[1]);
       home = w0?.code ?? null; homePredicted = w0 ? !w0.real : false;
       away = w1?.code ?? null; awayPredicted = w1 ? !w1.real : false;
     }
@@ -478,9 +494,14 @@ function buildTournament(live) {
         const opp = r.home === code ? r.away : r.home;
         const score = r.home === code ? `${r.hs}–${r.as}` : `${r.as}–${r.hs}`;
         const round = ROUNDS.find((x) => x.matches.some((mm) => mm.id === m.id));
-        return { opp, score, won, pens: r.pens, aet: r.aet, round: round?.key ?? "" };
+        return { id: m.id, opp, score, won, pens: r.pens, aet: r.aet, round: round?.key ?? "" };
       });
-  return { live, merged, byId, real, teamAlive, knockoutResults };
+  const finalM = real.final;
+  const champion = finalM.winner ?? null;
+  const runnerUp = champion ? (finalM.home === champion ? finalM.away : finalM.home) : null;
+  const third = real.third.winner ?? null;
+  const podium = { champion, runnerUp, third, complete: !!champion, final: finalM, thirdMatch: real.third };
+  return { live, merged, byId, real, teamAlive, knockoutResults, podium };
 }
 
 // The chain of match ids a team would pass through to reach the final.
@@ -543,7 +564,10 @@ button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent
 .hero-top { display: flex; flex-wrap: wrap; gap: 24px; justify-content: space-between; align-items: flex-start; }
 .hero-eyebrow { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; }
 .hero h1 { font-size: clamp(30px, 5vw, 52px); font-weight: 800; letter-spacing: -.02em; line-height: 1.04; margin: 10px 0 8px; }
-.hero h1 .grad { color: inherit; }
+.hero h1 .grad {
+  background: linear-gradient(100deg, var(--accent), #7ce7ff 45%, var(--gold));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
 .hero-hosts { color: var(--muted); font-size: 15px; }
 .stage-pill {
   display: inline-flex; align-items: center; gap: 8px; margin-top: 16px;
@@ -576,6 +600,35 @@ button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent
 .cd-cell b { display: block; font-size: 24px; font-variant-numeric: tabular-nums; }
 .cd-cell span { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted2); }
 
+/* ---------- champion card (replaces the countdown once the final is played) ---------- */
+.champcard {
+  min-width: 300px; max-width: 360px; padding: 16px 18px 14px; border-radius: var(--radius);
+  background: linear-gradient(165deg, rgba(255,201,77,.14), rgba(7,11,20,.6) 55%);
+  border: 1px solid rgba(255,201,77,.38); backdrop-filter: blur(6px);
+  box-shadow: 0 12px 40px rgba(255,201,77,.08);
+}
+.champcard .cd-label { color: var(--gold); font-weight: 800; }
+.champ-hero {
+  display: flex; align-items: center; gap: 14px; width: 100%; text-align: left;
+  margin: 12px 0 14px; padding: 4px; border-radius: 12px;
+  transition: background .15s ease, transform .12s ease;
+}
+.champ-hero:hover { background: rgba(255,201,77,.09); }
+.champ-hero:active { transform: scale(.99); }
+.champ-flag { font-size: 46px; line-height: 1; filter: drop-shadow(0 4px 12px rgba(0,0,0,.5)); }
+.champ-name { display: block; font-size: 24px; font-weight: 800; letter-spacing: -.02em; line-height: 1.1; }
+.champ-sub { display: block; margin-top: 3px; font-size: 12.5px; color: var(--muted); }
+.podium { display: flex; flex-direction: column; gap: 6px; }
+.podium-row {
+  display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 10px;
+  border-radius: 10px; border: 1px solid var(--line); background: rgba(7,11,20,.45);
+  font-size: 13px; font-weight: 700; transition: border-color .15s ease, background .15s ease;
+}
+.podium-row:hover { border-color: var(--line2); background: rgba(148,163,255,.07); }
+.podium-row .medal { font-size: 15px; }
+.podium-tag { margin-left: auto; font-size: 11px; font-weight: 600; color: var(--muted2); }
+.champ-meta { display: flex; align-items: center; gap: 6px; margin-top: 12px; font-size: 11.5px; color: var(--muted2); }
+
 .hero-scorers { margin-top: 28px; }
 .hero-scorers h3 { font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
 .scorer-row { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 10px; }
@@ -584,6 +637,9 @@ button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent
   transition: transform .18s ease, border-color .18s ease;
 }
 .scorer-card:hover { transform: translateY(-3px); border-color: var(--line2); }
+.scorer-card.gold { border-color: rgba(255,201,77,.42); background: linear-gradient(160deg, rgba(255,201,77,.12), rgba(16,24,39,.7) 60%); }
+.scorer-card.gold .rank { color: var(--gold); }
+.scorer-card.gold .sc-goals { color: var(--gold); }
 .scorer-card .rank { font-size: 11px; color: var(--muted2); font-weight: 700; }
 .scorer-card .sc-name { font-weight: 700; font-size: 14px; margin: 4px 0 2px; line-height: 1.2; }
 .scorer-card .sc-team { font-size: 12px; color: var(--muted); }
@@ -601,6 +657,11 @@ button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent
   transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
 }
 .fix-card:hover { transform: translateY(-3px); border-color: var(--line2); box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+.result-card { text-align: left; align-items: stretch; }
+.result-card .fix-round { color: var(--muted); }
+.result-card .fix-team.beaten { color: var(--muted2); }
+.result-card .fix-team.beaten span:first-child { opacity: .5; }
+.result-card:hover .preview-btn { background: var(--accent-dim); }
 .fix-round { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--blue); }
 .fix-teams { display: flex; flex-direction: column; gap: 6px; }
 .fix-team { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; }
@@ -642,6 +703,7 @@ button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent
 .trow.fav td:first-child .tname { color: var(--gold); }
 .tcell { display: flex; align-items: center; gap: 8px; font-weight: 600; }
 .tcell .stbar { width: 3px; height: 22px; border-radius: 2px; flex: none; }
+.tcell .tmedal { font-size: 12px; line-height: 1; }
 .st-through .stbar { background: var(--accent); }
 .st-third .stbar { background: var(--blue); }
 .st-out .stbar { background: rgba(255,75,92,.55); }
@@ -679,6 +741,7 @@ button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent
 .chip.g { background: var(--accent-dim); color: var(--accent); }
 .chip.r { background: rgba(255,75,92,.14); color: var(--red); }
 .chip.b { background: rgba(77,141,255,.14); color: var(--blue); }
+.chip.gold { background: rgba(255,201,77,.16); color: var(--gold); }
 .stars-list { display: flex; flex-wrap: wrap; gap: 8px; }
 .star-chip { padding: 7px 12px; border-radius: 999px; background: var(--card); border: 1px solid var(--line); font-size: 13px; font-weight: 600; }
 .path-step { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px dashed var(--line); font-size: 13px; }
@@ -692,7 +755,7 @@ button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent
 .clear-btn { font-size: 12px; font-weight: 700; color: var(--red); padding: 8px 12px; border-radius: 8px; }
 .clear-btn:hover { background: rgba(255,75,92,.1); }
 .bracket-scroll { overflow-x: auto; padding-bottom: 14px; }
-.bracket { display: flex; gap: 22px; min-width: 1080px; }
+.bracket { display: flex; gap: 20px; min-width: 1180px; }
 .bcol { flex: 1; display: flex; flex-direction: column; }
 .bcol > h5 { text-align: center; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
 .bcol-inner { flex: 1; display: flex; flex-direction: column; justify-content: space-around; gap: 10px; }
@@ -728,7 +791,10 @@ button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent
 .stat-table td { padding: 12px 14px; border-top: 1px solid var(--line); }
 .stat-table tr:hover td { background: rgba(148,163,255,.05); }
 .stat-table .num { text-align: right; font-variant-numeric: tabular-nums; font-weight: 800; }
-.chart-wrap { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 10px 6px; margin-bottom: 18px; }
+.chart-wrap { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 10px 6px; margin-bottom: 18px; }
+.chart-cap { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; padding: 0 10px 12px; }
+.chart-cap b { font-size: 13px; font-weight: 800; letter-spacing: -.01em; }
+.chart-cap span { font-size: 12px; color: var(--muted); }
 .empty-tab { background: var(--card); border: 1px dashed var(--line2); border-radius: var(--radius); padding: 34px 24px; text-align: center; color: var(--muted); font-size: 14px; line-height: 1.6; }
 .note-line { display: flex; gap: 8px; align-items: flex-start; font-size: 12px; color: var(--muted); margin-top: 12px; line-height: 1.5; }
 
@@ -742,6 +808,9 @@ button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent
 .mvs .side .f { font-size: 44px; }
 .mvs .side .n { font-weight: 800; margin-top: 6px; }
 .mvs .vs { color: var(--muted2); font-weight: 800; font-size: 13px; }
+.mvs .mscore { font-size: 34px; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -.02em; white-space: nowrap; }
+.mvs .mscore span { color: var(--muted2); margin: 0 4px; font-weight: 600; }
+.mvs .side.beaten { opacity: .55; }
 .h2h-note { background: var(--accent-dim); border: 1px solid rgba(45,227,138,.25); color: #c9f7dd; border-radius: 10px; padding: 12px 14px; font-size: 13px; line-height: 1.5; margin-bottom: 16px; }
 .form-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .form-col { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
@@ -790,6 +859,7 @@ button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent
 .rnode text { pointer-events: none; user-select: none; }
 .rnode.dim { opacity: .38; }
 .rnode.onpath circle.bg { stroke: var(--accent); stroke-width: 3; filter: drop-shadow(0 0 8px rgba(45,227,138,.7)); }
+.rnode.champnode circle.bg { stroke: var(--gold); stroke-width: 3; filter: drop-shadow(0 0 10px rgba(255,201,77,.75)); }
 .rnode.favnode circle.bg { stroke: var(--gold); stroke-width: 3; filter: drop-shadow(0 0 8px rgba(255,201,77,.7)); }
 .rnode.predicted circle.bg { stroke: var(--blue); stroke-width: 2.5; }
 .slot-pop { animation: slotPop .55s cubic-bezier(.2,.85,.3,1.15) both; }
@@ -817,6 +887,8 @@ button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent
   padding: 8px 12px; font-size: 12px; line-height: 1.5; white-space: nowrap;
   box-shadow: 0 8px 28px rgba(0,0,0,.5); animation: riseSoft .15s ease both;
 }
+/* flips below the badge for nodes near the top edge, so the tip never clips out of view */
+.rtip.below { transform: translate(-50%, 30%); }
 .rtip b { display: block; font-size: 13px; }
 .rtip .sub2 { color: var(--muted); }
 .layout-toggle { display: inline-flex; border: 1px solid var(--line2); border-radius: 999px; overflow: hidden; }
@@ -827,7 +899,7 @@ button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent
   .scorer-row { grid-template-columns: repeat(2, minmax(0,1fr)); }
   .hero { padding: 26px 20px; }
   .hero-top { flex-direction: column; }
-  .countdown { width: 100%; min-width: 0; }
+  .countdown, .champcard { width: 100%; min-width: 0; max-width: none; }
   .form-cols { grid-template-columns: 1fr; }
 }
 @media (max-width: 560px) {
@@ -837,6 +909,22 @@ button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent
   .hero-top > div { min-width: 0; }
   .cd-digits { flex-wrap: wrap; }
   .cd-cell { min-width: 56px; }
+  .section-h { flex-wrap: wrap; gap: 6px 10px; }
+  .section-h h2 { font-size: 17px; }
+  .mvs .mscore { font-size: 26px; }
+  /* the whole circle has to stay on screen — a clipped orbit reads as broken */
+  .radial-bg { padding: 2px; }
+}
+
+/* ---------- reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: .001ms !important; animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+  .ring-g, .stagger, .view-anim, .slot-pop, .champ-banner { opacity: 1; transform: none; }
+  .hero::after { display: none; }
 }
 `;
 
@@ -891,6 +979,45 @@ function Countdown({ match, round }) {
   );
 }
 
+/* Replaces the countdown once the final is decided. */
+function ChampionCard({ podium, onTeam }) {
+  const { champion, runnerUp, third, final, thirdMatch } = podium;
+  const score = final.home === champion
+    ? `${final.hs}–${final.as}`
+    : `${final.as}–${final.hs}`;
+  return (
+    <div className="champcard">
+      <div className="cd-label"><Trophy size={13} /> Champions</div>
+      <button className="champ-hero" onClick={() => onTeam(champion)} aria-label={`${nameOf(champion)} team details`}>
+        <span className="champ-flag">{flagOf(champion)}</span>
+        <span>
+          <span className="champ-name">{nameOf(champion)}</span>
+          <span className="champ-sub">
+            beat {nameOf(runnerUp)} {score}{final.aet ? " (aet)" : ""}{final.pens ? ` (${final.pens} pens)` : ""}
+          </span>
+        </span>
+      </button>
+      <div className="podium">
+        <button className="podium-row" onClick={() => onTeam(runnerUp)}>
+          <span className="medal">🥈</span> {flagOf(runnerUp)} {nameOf(runnerUp)}
+          <span className="podium-tag">Runners-up</span>
+        </button>
+        {third && (
+          <button className="podium-row" onClick={() => onTeam(third)}>
+            <span className="medal">🥉</span> {flagOf(third)} {nameOf(third)}
+            <span className="podium-tag">
+              {thirdMatch.hs != null ? `${thirdMatch.home === third ? thirdMatch.hs : thirdMatch.as}–${thirdMatch.home === third ? thirdMatch.as : thirdMatch.hs} play-off` : "Third place"}
+            </span>
+          </button>
+        )}
+      </div>
+      <div className="champ-meta">
+        <MapPin size={11} /> {final.venue} · {fmtLocal(final.kickoff, { hour: undefined, minute: undefined })}
+      </div>
+    </div>
+  );
+}
+
 function Wdl({ w, d, l }) {
   const seq = [
     ...Array(w).fill("W"),
@@ -907,6 +1034,7 @@ function Wdl({ w, d, l }) {
 function PreviewModal({ match, onClose }) {
   const { live, knockoutResults } = useTour();
   const { home, away } = match;
+  const played = !!match.winner;
   const roundLabel = ROUNDS.find((r) => r.matches.some((m) => m.id === match.id))?.label;
   const note = live.notes[match.id];
   const sideInfo = (code) => {
@@ -922,12 +1050,21 @@ function PreviewModal({ match, onClose }) {
       <div className="modal-wrap" role="dialog" aria-modal="true">
         <div className="modal">
           <button className="close" onClick={onClose} aria-label="Close" style={{ position: "absolute", top: 14, right: 14, color: "var(--muted)" }}><X size={20} /></button>
-          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: ".12em", textTransform: "uppercase", color: "var(--blue)" }}>{roundLabel} · Match preview</div>
-          <div className="mvs">
-            <div className="side"><div className="f">{flagOf(home)}</div><div className="n">{nameOf(home)}</div></div>
-            <div className="vs">VS</div>
-            <div className="side"><div className="f">{flagOf(away)}</div><div className="n">{nameOf(away)}</div></div>
+          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: ".12em", textTransform: "uppercase", color: "var(--blue)" }}>
+            {roundLabel} · {played ? "Match report" : "Match preview"}
           </div>
+          <div className="mvs">
+            <div className={`side ${played && match.winner !== home ? "beaten" : ""}`}><div className="f">{flagOf(home)}</div><div className="n">{nameOf(home)}</div></div>
+            {played
+              ? <div className="mscore">{match.hs}<span>–</span>{match.as}</div>
+              : <div className="vs">VS</div>}
+            <div className={`side ${played && match.winner !== away ? "beaten" : ""}`}><div className="f">{flagOf(away)}</div><div className="n">{nameOf(away)}</div></div>
+          </div>
+          {played && (match.pens || match.aet) && (
+            <div style={{ textAlign: "center", color: "var(--gold)", fontSize: 12, fontWeight: 700, marginTop: -8, marginBottom: 8 }}>
+              {match.pens ? `${nameOf(match.winner)} won ${match.pens} on penalties` : "After extra time"}
+            </div>
+          )}
           <div style={{ textAlign: "center", color: "var(--muted)", fontSize: 13, marginBottom: 16 }}>
             <Calendar size={13} style={{ verticalAlign: -2 }} /> {fmtLocal(match.kickoff)}{match.timeTBC && " ※ time unconfirmed"}
             {match.venue && <> · <MapPin size={13} style={{ verticalAlign: -2 }} /> {match.venue}</>}
@@ -936,7 +1073,7 @@ function PreviewModal({ match, onClose }) {
           <div className="form-cols">
             {[[home, H], [away, A]].map(([code, S]) => (
               <div className="form-col" key={code}>
-                <h5>{flagOf(code)} {nameOf(code)} — tournament so far</h5>
+                <h5>{flagOf(code)} {nameOf(code)} — {played ? "tournament record" : "tournament so far"}</h5>
                 {S.row && <Wdl w={S.row.w} d={S.row.d} l={S.row.l} />}
                 <ul>
                   {S.row && (
@@ -961,13 +1098,21 @@ function PreviewModal({ match, onClose }) {
 }
 
 function TeamPanel({ code, onClose, favorite, setFavorite, bracket }) {
-  const { teamAlive, knockoutResults } = useTour();
+  const { teamAlive, knockoutResults, podium } = useTour();
   const g = groupOf(code);
   const row = g?.rows.find((r) => r.t === code);
   const ko = knockoutResults(code);
-  const alive = teamAlive(code);
+  const alive = teamAlive(code) && !podium.complete;
   const path = alive ? pathToFinal(code, bracket) : [];
   const roundOfMatch = (id) => ROUNDS.find((r) => r.matches.some((m) => m.id === id))?.label;
+  // Where the run ended: a medal if they made the podium, otherwise the round they lost.
+  const finish =
+    podium.champion === code ? <span className="chip gold">🏆 World champions</span>
+    : podium.runnerUp === code ? <span className="chip b">🥈 Runners-up</span>
+    : podium.third === code ? <span className="chip b">🥉 Third place</span>
+    : alive ? <span className="chip g">Still alive</span>
+    : row?.st === "OUT" ? <span className="chip r">Out in groups</span>
+    : <span className="chip r">Out — {roundOfMatch(ko.find((r) => !r.won)?.id) ?? "knockouts"}</span>;
   return (
     <>
       <div className="scrim" onClick={onClose} />
@@ -976,12 +1121,7 @@ function TeamPanel({ code, onClose, favorite, setFavorite, bracket }) {
         <div className="panel-flag">{flagOf(code)}</div>
         <h2>{nameOf(code)}</h2>
         <div className="sub">
-          Group {g?.id} · {row && STATUS_META[row.st].label} ·{" "}
-          {alive
-            ? <span className="chip g">Still alive</span>
-            : row?.st === "OUT"
-              ? <span className="chip r">Out in groups</span>
-              : <span className="chip r">Out — {ko.find((r) => !r.won)?.round === "R16" ? "Round of 16" : "Round of 32"}</span>}
+          Group {g?.id} · {row && STATUS_META[row.st].label} · {finish}
         </div>
         <button className={`favbtn ${favorite === code ? "on" : ""}`} onClick={() => setFavorite(favorite === code ? null : code)}>
           <Star size={14} fill={favorite === code ? "currentColor" : "none"} />
@@ -1051,7 +1191,9 @@ function TeamPanel({ code, onClose, favorite, setFavorite, bracket }) {
 }
 
 function GroupsView({ onTeam, favorite }) {
-  const { teamAlive } = useTour();
+  const { teamAlive, podium } = useTour();
+  const medalOf = (code) =>
+    podium.champion === code ? "🏆" : podium.runnerUp === code ? "🥈" : podium.third === code ? "🥉" : null;
   return (
     <>
       <div className="groups-grid">
@@ -1080,6 +1222,7 @@ function GroupsView({ onTeam, favorite }) {
                           <i className="stbar" />
                           <span className="tflag">{flagOf(r.t)}</span>
                           <span className="tname">{nameOf(r.t)}</span>
+                          {medalOf(r.t) && <span className="tmedal" title={medalOf(r.t) === "🏆" ? "World champions" : medalOf(r.t) === "🥈" ? "Runners-up" : "Third place"}>{medalOf(r.t)}</span>}
                           {favorite === r.t && <Star size={11} fill="currentColor" color="var(--gold)" />}
                         </span>
                       </td>
@@ -1099,7 +1242,8 @@ function GroupsView({ onTeam, favorite }) {
         <span><i style={{ background: "var(--accent)" }} />Advanced (top two)</span>
         <span><i style={{ background: "var(--blue)" }} />Advanced (best third)</span>
         <span><i style={{ background: "rgba(255,75,92,.55)" }} />Eliminated in groups</span>
-        <span>Dimmed rows: knocked out in the Round of 32 · click any team for details</span>
+        {podium.complete && <span>🏆 champions · 🥈 runners-up · 🥉 third place</span>}
+        <span>Dimmed rows: eliminated in the knockout rounds · click any team for details</span>
       </div>
     </>
   );
@@ -1210,12 +1354,13 @@ function RadialBracket({ bracket, predictions, favorite, selected, onTeamClick }
               m.live ? "livenode" : "",
               isLoserDone ? "dim" : "",
               onpath ? "onpath" : "",
+              code && ring === ORBIT_ORDERS.length - 1 && m.winner === code ? "champnode" : "",
               favorite === code && code ? "favnode" : "",
               (isPredictedEntry || (!played && predictions[m.id] === code && code)) ? "predicted" : "",
             ].join(" ")}
             onClick={() => code && onTeamClick(m, code)}
             onMouseEnter={() => code && setTip({
-              x, y,
+              x, y, below: y < 220,
               title: `${flagOf(code)} ${nameOf(code)}`,
               sub: `${roundLabelOf(id)} — ${sub}`,
             })}
@@ -1279,9 +1424,12 @@ function RadialBracket({ bracket, predictions, favorite, selected, onTeamClick }
             <text className="trophy-emoji" x={CX} y={CY + 6} textAnchor="middle" dominantBaseline="central" fontSize="64">🏆</text>
             {champion ? (
               <g className="champ-banner" key={champion}>
-                <text x={CX} y={CY + 62} textAnchor="middle" fontSize="26">{flagOf(champion)}</text>
-                <text x={CX} y={CY + 86} textAnchor="middle" fontSize="13" fontWeight="800" fill={finalM.winner ? "#ffc94d" : "#4d8dff"} letterSpacing="2">
+                <text x={CX} y={CY + 60} textAnchor="middle" fontSize="26">{flagOf(champion)}</text>
+                <text x={CX} y={CY + 84} textAnchor="middle" fontSize="12" fontWeight="800" fill={finalM.winner ? "#ffc94d" : "#4d8dff"} letterSpacing="2.5">
                   {finalM.winner ? "CHAMPIONS" : "YOUR PICK"}
+                </text>
+                <text x={CX} y={CY + 106} textAnchor="middle" fontSize="18" fontWeight="800" fill="#eef2ff">
+                  {nameOf(champion)}
                 </text>
               </g>
             ) : (
@@ -1290,7 +1438,7 @@ function RadialBracket({ bracket, predictions, favorite, selected, onTeamClick }
           </g>
         </svg>
         {tip && (
-          <div className="rtip" style={{ left: `${tip.x / 10}%`, top: `${tip.y / 10}%` }}>
+          <div className={`rtip ${tip.below ? "below" : ""}`} style={{ left: `${tip.x / 10}%`, top: `${tip.y / 10}%` }}>
             <b>{tip.title}</b>
             <span className="sub2">{tip.sub}</span>
           </div>
@@ -1364,22 +1512,26 @@ function ClassicGrid({ bracket, predictions, favorite, selected, mode, clickTeam
 }
 
 function Bracket({ bracket, predictions, setPredictions, favorite, selected, setSelected }) {
+  const { podium } = useTour();
   const [layout, setLayout] = useState("orbit"); // orbit | classic
   const [mode, setMode] = useState("explore"); // explore | predict
-  const clickTeam = useBracketClick(mode, selected, setSelected, setPredictions);
+  const effectiveMode = podium.complete ? "explore" : mode;
+  const clickTeam = useBracketClick(effectiveMode, selected, setSelected, setPredictions);
   return (
     <>
       <div className="bracket-tools">
         <div className="layout-toggle" role="tablist" aria-label="Bracket layout">
-          <button className={layout === "orbit" ? "on" : ""} onClick={() => setLayout("orbit")}><CircleDot size={13} /> Orbit</button>
-          <button className={layout === "classic" ? "on" : ""} onClick={() => setLayout("classic")}><Calendar size={13} /> Classic</button>
+          <button className={layout === "orbit" ? "on" : ""} onClick={() => setLayout("orbit")} role="tab" aria-selected={layout === "orbit"}><CircleDot size={13} /> Orbit</button>
+          <button className={layout === "classic" ? "on" : ""} onClick={() => setLayout("classic")} role="tab" aria-selected={layout === "classic"}><Calendar size={13} /> Classic</button>
         </div>
-        <div className="mode-toggle" role="tablist" aria-label="Bracket mode">
-          <button className={mode === "explore" ? "on" : ""} onClick={() => setMode("explore")}><Eye size={13} /> Explore</button>
-          <button className={mode === "predict" ? "on" : ""} onClick={() => setMode("predict")}><MousePointerClick size={13} /> Predict</button>
-        </div>
+        {!podium.complete && (
+          <div className="mode-toggle" role="tablist" aria-label="Bracket mode">
+            <button className={mode === "explore" ? "on" : ""} onClick={() => setMode("explore")} role="tab" aria-selected={mode === "explore"}><Eye size={13} /> Explore</button>
+            <button className={mode === "predict" ? "on" : ""} onClick={() => setMode("predict")} role="tab" aria-selected={mode === "predict"}><MousePointerClick size={13} /> Predict</button>
+          </div>
+        )}
         <span>
-          {mode === "explore"
+          {effectiveMode === "explore"
             ? "Click any flag to light up that team's road to the trophy."
             : "Click winners in unplayed matches — your picks fill the inner rings."}
         </span>
@@ -1407,7 +1559,9 @@ function Bracket({ bracket, predictions, setPredictions, favorite, selected, set
       )}
       <div className="note-line" style={{ maxWidth: 720 }}>
         <Info size={13} style={{ flex: "none", marginTop: 2 }} />
-        Blue-ringed flags are your predictions, not results — hover any flag for score, date and venue. ※ = pairing not yet officially confirmed. Quarter-final onward venues shown per the official schedule.
+        {podium.complete
+          ? <>Rings run outward-in: Round of 32 on the rim, the final at the centre. Hover a flag for the score, date and venue; tap or click one to trace that team's run. Dimmed flags went out that round.</>
+          : <>Blue-ringed flags are your predictions, not results — hover any flag for score, date and venue. Dimmed flags are eliminated.</>}
       </div>
     </>
   );
@@ -1452,13 +1606,17 @@ function StatsPanel() {
       {tab === "goals" && (
         <>
           <div className="chart-wrap">
+            <div className="chart-cap">
+              <b>Goals scored</b>
+              {scorers[0] && <span>top eight · {scorers[0].player.split(" ").slice(-1)[0]} leads on {scorers[0].goals}</span>}
+            </div>
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={chartData} margin={{ top: 6, right: 12, left: -18, bottom: 0 }}>
                 <XAxis dataKey="name" tick={{ fill: "#8b96b8", fontSize: 12 }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fill: "#5c6685", fontSize: 11 }} axisLine={false} tickLine={false} allowDecimals={false} />
                 <ReTooltip cursor={{ fill: "rgba(148,163,255,.06)" }} contentStyle={{ background: "#101827", border: "1px solid rgba(148,163,255,.22)", borderRadius: 10, color: "#eef2ff" }} />
                 <Bar dataKey="goals" radius={[6, 6, 0, 0]} isAnimationActive={false}>
-                  {chartData.map((_, i) => <Cell key={i} fill={i < 2 ? "#2de38a" : i < 5 ? "#4d8dff" : "#2a3a5e"} />)}
+                  {chartData.map((_, i) => <Cell key={i} fill={i === 0 ? "#ffc94d" : "#3d5a91"} />)}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -1495,7 +1653,7 @@ function StatsPanel() {
               ))}
             </tbody>
           </table>
-          <div className="note-line"><Info size={13} style={{ flex: "none", marginTop: 2 }} /> Only leaders confirmed by multiple outlets are listed. ※ Guimarães is reported second but his exact count wasn't verified at build time.</div>
+          <div className="note-line"><Info size={13} style={{ flex: "none", marginTop: 2 }} /> Assists are counted from ESPN's play-by-play (three or more). Data as of {live.asOf}.</div>
         </>
       )}
 
@@ -1514,7 +1672,7 @@ function StatsPanel() {
               ))}
             </tbody>
           </table>
-          <div className="note-line"><Info size={13} style={{ flex: "none", marginTop: 2 }} /> Shutout counts include group stage and knockout rounds. Full goalkeeping stats: FIFA.com. Data as of {live.asOf}.</div>
+          <div className="note-line"><Info size={13} style={{ flex: "none", marginTop: 2 }} /> Shutout counts include the group stage and the knockout rounds, and are only attributed for keepers who started throughout. Full goalkeeping stats: FIFA.com. Data as of {live.asOf}.</div>
         </>
       )}
 
@@ -1522,8 +1680,8 @@ function StatsPanel() {
         <div className="empty-tab">
           <AlertTriangle size={22} style={{ color: "var(--gold)", marginBottom: 8 }} />
           <div>
-            {tab === "cards" ? "Disciplinary" : "Possession"} leaders weren't verifiable from live sources when this dashboard
-            was last updated ({live.asOf}), and we don't show unverified numbers.
+            {tab === "cards" ? "Disciplinary" : "Possession"} totals aren't published in the feed this dashboard reads
+            (last checked {live.asOf}), and we don't show numbers we can't source.
           </div>
           <div style={{ marginTop: 6 }}>
             Live figures: <b style={{ color: "var(--text)" }}>fifa.com → Tournament Statistics</b>
@@ -1576,6 +1734,18 @@ export default function App() {
     upcoming.find((m) => m.home && m.away && new Date(m.kickoff) > new Date()) ||
     upcoming[0];
 
+  // Most recent completed matches — shown instead of fixtures once the tournament ends.
+  const recent = useMemo(
+    () =>
+      tour.merged
+        .filter((m) => m.winner && m.kickoff)
+        .map((m) => ({ ...bracket[m.id] }))
+        .sort((a, b) => new Date(b.kickoff) - new Date(a.kickoff))
+        .slice(0, 8),
+    [tour, bracket]
+  );
+  const showResults = upcoming.length === 0 && recent.length > 0;
+
   const roundLabelOf = (id) => ROUNDS.find((r) => r.matches.some((m) => m.id === id))?.label;
 
   // close overlays with Escape
@@ -1610,14 +1780,16 @@ export default function App() {
                 : "Connecting to live data…"}
             </div>
           </div>
-          {nextMatch && <Countdown match={nextMatch} round={roundLabelOf(nextMatch.id)} />}
+          {tour.podium.complete
+            ? <ChampionCard podium={tour.podium} onTeam={setPanelTeam} />
+            : nextMatch && <Countdown match={nextMatch} round={roundLabelOf(nextMatch.id)} />}
         </div>
         <div className="hero-scorers">
-          <h3><Flame size={14} /> Golden Boot race</h3>
+          <h3><Flame size={14} /> {tour.podium.complete ? "Golden Boot — final standings" : "Golden Boot race"}</h3>
           <div className="scorer-row">
             {live.scorers.slice(0, 5).map((s, i) => (
-              <div className="scorer-card stagger" style={{ animationDelay: `${0.15 + i * 0.08}s` }} key={s.player}>
-                <div className="rank">#{i + 1}</div>
+              <div className={`scorer-card stagger ${i === 0 && tour.podium.complete ? "gold" : ""}`} style={{ animationDelay: `${0.15 + i * 0.08}s` }} key={s.player}>
+                <div className="rank">{i === 0 && tour.podium.complete ? "🥇 Winner" : `#${i + 1}`}</div>
                 <div className="sc-name">{s.player}</div>
                 <div className="sc-team">{flagOf(s.team)} {nameOf(s.team)}</div>
                 <div className="sc-goals">{s.goals}<small>goals</small></div>
@@ -1627,10 +1799,57 @@ export default function App() {
         </div>
       </section>
 
-      {/* ---------- UPCOMING STRIP ---------- */}
-      <div className="section-h"><Calendar className="icn" size={18} /><h2>Upcoming matches</h2><span style={{ color: "var(--muted2)", fontSize: 12 }}>times shown in your timezone</span></div>
+      {/* ---------- FEATURED: CIRCULAR BRACKET ---------- */}
+      <div className="section-h">
+        <Trophy className="icn" size={18} />
+        <h2>{tour.podium.complete ? "The road to the trophy" : "Knockout bracket"}</h2>
+        <span style={{ color: "var(--muted2)", fontSize: 12 }}>
+          32 teams, five rounds, one trophy — read it from the outside in
+        </span>
+      </div>
+      <Bracket
+        bracket={bracket}
+        predictions={predictions}
+        setPredictions={setPredictions}
+        favorite={favorite}
+        selected={selectedBracketTeam}
+        setSelected={setSelectedBracketTeam}
+      />
+
+      {/* ---------- RESULTS / UPCOMING STRIP ---------- */}
+      <div className="section-h">
+        <Calendar className="icn" size={18} />
+        <h2>{showResults ? "How it finished" : "Upcoming matches"}</h2>
+        <span style={{ color: "var(--muted2)", fontSize: 12 }}>
+          {showResults ? "the closing rounds — tap any card for the full report" : "times shown in your timezone"}
+        </span>
+      </div>
       <div className="strip">
-        {upcoming.map((m, i) => (
+        {showResults && recent.map((m, i) => (
+          <button
+            className="fix-card result-card stagger"
+            style={{ animationDelay: `${0.1 + i * 0.07}s` }}
+            key={m.id}
+            onClick={() => setPreview(m)}
+          >
+            <div className="fix-round">{roundLabelOf(m.id)}</div>
+            <div className="fix-teams">
+              {[[m.home, m.hs], [m.away, m.as]].map(([c, sc], j) => (
+                <div className={`fix-team ${favorite === c ? "fav" : ""} ${m.winner === c ? "" : "beaten"}`} key={j}>
+                  <span>{flagOf(c)}</span>
+                  <span>{nameOf(c)}</span>
+                  <b style={{ marginLeft: "auto", fontVariantNumeric: "tabular-nums" }}>{sc}</b>
+                </div>
+              ))}
+            </div>
+            <div className="fix-meta">
+              <span><Trophy size={12} /> {nameOf(m.winner)} won{m.pens ? ` on penalties (${m.pens})` : m.aet ? " after extra time" : ""}</span>
+              {m.venue && <span><MapPin size={12} /> {m.venue}</span>}
+            </div>
+            <span className="preview-btn">Match report <ChevronRight size={13} /></span>
+          </button>
+        ))}
+        {!showResults && upcoming.map((m, i) => (
           <div className="fix-card stagger" style={{ animationDelay: `${0.1 + i * 0.07}s` }} key={m.id}>
             <div className="fix-round">
               {roundLabelOf(m.id)}
@@ -1663,23 +1882,13 @@ export default function App() {
 
       {/* ---------- VIEW NAV ---------- */}
       <nav className="viewnav" aria-label="Dashboard views">
-        {[["groups", "Group stage"], ["bracket", "Knockout bracket"], ["stats", "Stats"]].map(([id, label]) => (
-          <button key={id} className={view === id ? "on" : ""} onClick={() => setView(id)}>{label}</button>
+        {[["groups", "Group stage"], ["stats", "Tournament stats"]].map(([id, label]) => (
+          <button key={id} className={view === id ? "on" : ""} onClick={() => setView(id)} aria-current={view === id}>{label}</button>
         ))}
       </nav>
 
       <div className="view-anim" key={view}>
         {view === "groups" && <GroupsView onTeam={setPanelTeam} favorite={favorite} />}
-        {view === "bracket" && (
-          <Bracket
-            bracket={bracket}
-            predictions={predictions}
-            setPredictions={setPredictions}
-            favorite={favorite}
-            selected={selectedBracketTeam}
-            setSelected={setSelectedBracketTeam}
-          />
-        )}
         {view === "stats" && <StatsPanel />}
       </div>
 
@@ -1696,8 +1905,8 @@ export default function App() {
 
       <footer className="foot">
         Scores, fixtures and live match states stream from ESPN's public scoreboard API every 5 seconds, with
-        <code> live.json</code> (last compiled {live.asOf}) as fallback and as the source for scorer/stat tables.
-        Items marked ※ could not be fully verified. This is a fan dashboard — not affiliated with FIFA or ESPN.
+        <code> live.json</code> (last compiled {live.asOf}) as fallback and as the source for the scorer, assist and
+        clean-sheet tables. This is a fan dashboard — not affiliated with FIFA or ESPN.
       </footer>
     </div>
     </TourCtx.Provider>

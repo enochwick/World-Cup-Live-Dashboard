@@ -1,6 +1,6 @@
 {
-  "asOf": "July 19, 2026",
-  "stage": "Semifinals · France vs England and Spain vs Argentina",
+  "asOf": "August 6, 2026",
+  "stage": "Tournament complete · 🇪🇸 Spain are world champions",
   "results": {
     "m73": {
       "hs": 0,
@@ -165,6 +165,11 @@
       "as": 0,
       "winner": "ESP",
       "aet": true
+    },
+    "third": {
+      "hs": 4,
+      "as": 6,
+      "winner": "ENG"
     }
   },
   "scorers": [
@@ -377,7 +382,7 @@
       "player": "Unai Simón",
       "team": "ESP",
       "cs": 7,
-      "note": "Spain are yet to concede at this World Cup"
+      "note": "World champions — one goal conceded in eight matches"
     },
     {
       "player": "Raúl Rangel",
@@ -387,11 +392,15 @@
     }
   ],
   "notes": {
-    "r16e": "Mikel Merino's goal sent Spain past Ronaldo's Portugal 1-0 — La Roja still yet to concede.",
-    "r16f": "Belgium routed the USA 4-1, Charles De Ketelaere scoring twice.",
+    "final": "Spain beat Argentina 1–0 after extra time at MetLife Stadium to win their second World Cup.",
+    "third": "England thrashed France 6–4 in the highest-scoring third-place play-off the tournament has seen.",
+    "sf1": "Spain ended host-slayers France's run 2–0 without conceding — again.",
+    "sf2": "Messi's Argentina edged England 2–1 to reach a second straight final.",
     "qf1": "Morocco vs France — a rematch of the 2022 World Cup semi-final.",
-    "qf2": "Haaland's Norway, fresh off eliminating Brazil, meet Kane's England.",
-    "m87": "Messi scored as Argentina survived an extra-time scare against debutants Cape Verde.",
-    "r16g": "Messi struck once and set up another as Argentina came from 2-0 down to beat Egypt 3-2."
+    "qf2": "Haaland's Norway, fresh off eliminating Brazil, met Kane's England.",
+    "r16e": "Mikel Merino's goal sent Spain past Ronaldo's Portugal 1-0.",
+    "r16f": "Belgium routed the USA 4-1, Charles De Ketelaere scoring twice.",
+    "r16g": "Messi struck once and set up another as Argentina came from 2-0 down to beat Egypt 3-2.",
+    "m87": "Messi scored as Argentina survived an extra-time scare against debutants Cape Verde."
   }
 }
