@@ -824,6 +824,14 @@ button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent
 .wdl .L { background: rgba(255,75,92,.16); color: var(--red); }
 
 .foot { margin-top: 44px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--muted2); font-size: 12px; line-height: 1.7; }
+.foot-credit { margin-top: 14px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.foot-credit a {
+  color: var(--accent); text-decoration: none; font-weight: 700;
+  border-bottom: 1px solid rgba(45,227,138,.3); padding-bottom: 1px;
+  transition: color .15s ease, border-color .15s ease;
+}
+.foot-credit a:hover { color: #7cf3b6; border-color: rgba(45,227,138,.8); }
+.foot-credit a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
 
 /* ---------- motion ---------- */
 @keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
@@ -853,12 +861,16 @@ button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent
 }
 .ring-g { transform-origin: 500px 500px; opacity: 0; animation: ringIn .8s cubic-bezier(.2,.8,.25,1) forwards; }
 @keyframes ringIn { from { opacity: 0; transform: rotate(-7deg) scale(.94); } to { opacity: 1; transform: none; } }
-.rnode { cursor: pointer; }
+.rnode { cursor: pointer; transition: opacity .2s ease; }
 .rnode circle.bg { transition: r .18s ease, stroke .18s ease, filter .2s ease; }
 .rnode:hover circle.bg { filter: brightness(1.35) drop-shadow(0 0 6px rgba(45,227,138,.5)); }
 .rnode text { pointer-events: none; user-select: none; }
 .rnode.dim { opacity: .38; }
+.rnode.faded { opacity: .22; }
+.rnode.onpath { opacity: 1; }
 .rnode.onpath circle.bg { stroke: var(--accent); stroke-width: 3; filter: drop-shadow(0 0 8px rgba(45,227,138,.7)); }
+/* the round the selected team went out — the run ends here, so it reads red */
+.rnode.stopnode circle.bg { stroke: var(--red); stroke-width: 3; filter: drop-shadow(0 0 8px rgba(255,75,92,.65)); }
 .rnode.champnode circle.bg { stroke: var(--gold); stroke-width: 3; filter: drop-shadow(0 0 10px rgba(255,201,77,.75)); }
 .rnode.favnode circle.bg { stroke: var(--gold); stroke-width: 3; filter: drop-shadow(0 0 8px rgba(255,201,77,.7)); }
 .rnode.predicted circle.bg { stroke: var(--blue); stroke-width: 2.5; }
@@ -884,7 +896,8 @@ button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent
 .rtip {
   position: absolute; z-index: 20; pointer-events: none; transform: translate(-50%, -130%);
   background: rgba(10,15,28,.94); border: 1px solid var(--line2); border-radius: 10px;
-  padding: 8px 12px; font-size: 12px; line-height: 1.5; white-space: nowrap;
+  padding: 8px 12px; font-size: 12px; line-height: 1.5;
+  width: max-content; max-width: min(260px, 72vw);
   box-shadow: 0 8px 28px rgba(0,0,0,.5); animation: riseSoft .15s ease both;
 }
 /* flips below the badge for nodes near the top edge, so the tip never clips out of view */
@@ -914,6 +927,13 @@ button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent
   .mvs .mscore { font-size: 26px; }
   /* the whole circle has to stay on screen — a clipped orbit reads as broken */
   .radial-bg { padding: 2px; }
+  /* there is no room to float a tip beside a badge at this width, and letting it
+     try pushed the whole page into horizontal scroll — dock it instead */
+  .rtip {
+    left: 50% !important; top: auto !important; bottom: 6px;
+    transform: translateX(-50%) !important;
+    width: calc(100% - 16px); max-width: none; text-align: center;
+  }
 }
 
 /* ---------- reduced motion ---------- */
@@ -1267,15 +1287,24 @@ function useBracketClick(mode, selected, setSelected, setPredictions) {
 
 /* ---------- radial (orbit) bracket ---------- */
 
-const ORBIT_ORDERS = [
-  ["m73", "m80", "m79", "m81", "m74", "m77", "m75", "m76", "m84", "m83", "m82", "m78", "m87", "m86", "m85", "m88"],
-  ["r16a", "r16b", "r16c", "r16d", "r16e", "r16f", "r16g", "r16h"],
-  ["qf1", "qf2", "qf3", "qf4"],
-  ["sf1", "sf2"],
-  ["final"],
-];
+/* Ring order is derived from the bracket itself, walking outward from the final.
+   Each ring lists its matches in the order their feeders sit on the ring outside
+   it, which is what makes `inner = {k: k>>1, s: k&1}` below land on the right
+   slot. Hardcoding these lists once let the orbit drift out of sync with the
+   real feeds (qf1+qf3 → sf1, not qf1+qf2), so it is computed now. */
+const ORBIT_ORDERS = (() => {
+  const byId = Object.fromEntries(ALL_KO.map((m) => [m.id, m]));
+  const rings = [["final"]];
+  for (;;) {
+    const outer = rings[0].flatMap((id) => byId[id]?.feeds ?? []);
+    if (!outer.length) return rings;
+    rings.unshift(outer);
+  }
+})();
 const ORBIT_RADII = [442, 348, 258, 170, 96];
-const ORBIT_BADGE = [26, 27, 29, 31, 34];
+// Slots are evenly spaced, so badges can run large without colliding: the outer
+// ring has ~87 units between centres against a 60-unit badge.
+const ORBIT_BADGE = [30, 31, 33, 35, 38];
 const CX = 500, CY = 500;
 
 const polar = (r, deg) => {
@@ -1322,11 +1351,15 @@ function RadialBracket({ bracket, predictions, favorite, selected, onTeamClick }
         const isWinner = played && m.winner === code;
         const isLoserDone = (played && code && !isWinner) || (code && !teamAlive(code) && ring === 0 && !played);
         const onpath = code && selected === code && (highlight.has(id) || ring === 0);
+        // Where the selected team's run stopped: highlight the badge, but never
+        // draw a lit connector onward — that line belongs to whoever beat them.
+        const advanced = code && (m.winner === code || (!m.winner && predictions[m.id] === code));
+        const stopHere = onpath && played && !advanced;
         // connector: team → elbow → match junction (at winner angle)
         const aWin = inner ? innerAngle : (s === 0 ? 0 : 180);
         const [ex, ey] = polar(rMid, aTeam);
         const [jx, jy] = polar(rMid, aWin);
-        const hot = code && selected === code;
+        const hot = code && selected === code && advanced;
         ringLinks.push(
           <path
             key={`${id}-${s}-ln`}
@@ -1353,7 +1386,10 @@ function RadialBracket({ bracket, predictions, favorite, selected, onTeamClick }
               "rnode",
               m.live ? "livenode" : "",
               isLoserDone ? "dim" : "",
+              // when a team is picked, everything off its road recedes
+              selected && code !== selected ? "faded" : "",
               onpath ? "onpath" : "",
+              stopHere ? "stopnode" : "",
               code && ring === ORBIT_ORDERS.length - 1 && m.winner === code ? "champnode" : "",
               favorite === code && code ? "favnode" : "",
               (isPredictedEntry || (!played && predictions[m.id] === code && code)) ? "predicted" : "",
@@ -1438,7 +1474,11 @@ function RadialBracket({ bracket, predictions, favorite, selected, onTeamClick }
           </g>
         </svg>
         {tip && (
-          <div className={`rtip ${tip.below ? "below" : ""}`} style={{ left: `${tip.x / 10}%`, top: `${tip.y / 10}%` }}>
+          <div
+            className={`rtip ${tip.below ? "below" : ""}`}
+            // clamped so tips on the rim stay inside the panel instead of clipping
+            style={{ left: `${Math.min(82, Math.max(18, tip.x / 10))}%`, top: `${tip.y / 10}%` }}
+          >
             <b>{tip.title}</b>
             <span className="sub2">{tip.sub}</span>
           </div>
@@ -1907,6 +1947,9 @@ export default function App() {
         Scores, fixtures and live match states stream from ESPN's public scoreboard API every 5 seconds, with
         <code> live.json</code> (last compiled {live.asOf}) as fallback and as the source for the scorer, assist and
         clean-sheet tables. This is a fan dashboard — not affiliated with FIFA or ESPN.
+        <div className="foot-credit">
+          Created by <a href="https://heynok.com" target="_blank" rel="noopener noreferrer">heynok.com</a>
+        </div>
       </footer>
     </div>
     </TourCtx.Provider>
