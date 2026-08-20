@@ -184,6 +184,11 @@
       "goals": 8
     },
     {
+      "player": "Jude Bellingham",
+      "team": "ENG",
+      "goals": 7
+    },
+    {
       "player": "Erling Haaland",
       "team": "NOR",
       "goals": 7
@@ -194,9 +199,9 @@
       "goals": 6
     },
     {
-      "player": "Jude Bellingham",
+      "player": "Harry Kane",
       "team": "ENG",
-      "goals": 5
+      "goals": 6
     },
     {
       "player": "Mikel Oyarzabal",
@@ -204,13 +209,13 @@
       "goals": 5
     },
     {
-      "player": "Harry Kane",
-      "team": "ENG",
-      "goals": 5
-    },
-    {
       "player": "Ismaïla Sarr",
       "team": "SEN",
+      "goals": 4
+    },
+    {
+      "player": "Julián Quiñones",
+      "team": "MEX",
       "goals": 4
     },
     {
@@ -246,11 +251,6 @@
     {
       "player": "Cody Gakpo",
       "team": "NED",
-      "goals": 3
-    },
-    {
-      "player": "Julián Quiñones",
-      "team": "MEX",
       "goals": 3
     },
     {
@@ -304,6 +304,11 @@
       "goals": 3
     },
     {
+      "player": "Raúl Jiménez",
+      "team": "MEX",
+      "goals": 3
+    },
+    {
       "player": "Yoane Wissa",
       "team": "COD",
       "goals": 3
@@ -353,6 +358,11 @@
     },
     {
       "player": "Anthony Gordon",
+      "team": "ENG",
+      "assists": 3
+    },
+    {
+      "player": "Bukayo Saka",
       "team": "ENG",
       "assists": 3
     },
