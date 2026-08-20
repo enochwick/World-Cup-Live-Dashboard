@@ -179,6 +179,11 @@
       "goals": 10
     },
     {
+      "player": "Lionel Messi",
+      "team": "ARG",
+      "goals": 8
+    },
+    {
       "player": "Jude Bellingham",
       "team": "ENG",
       "goals": 7
@@ -187,11 +192,6 @@
       "player": "Erling Haaland",
       "team": "NOR",
       "goals": 7
-    },
-    {
-      "player": "Lionel Messi",
-      "team": "ARG",
-      "goals": 6
     },
     {
       "player": "Ousmane Dembélé",
@@ -314,7 +314,7 @@
       "goals": 3
     }
   ],
-  "scorersNote": "Mbappé leads the Golden Boot outright on 10, clear of Bellingham, Haaland on 7. Ties are ordered by assists.",
+  "scorersNote": "Mbappé leads the Golden Boot outright on 10, clear of Messi on 8. Ties are ordered by assists.",
   "assists": [
     {
       "player": "Michael Olise",
